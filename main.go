@@ -69,29 +69,51 @@ func printColorText(connected bool, latency time.Duration) {
 func printLatencyGraph(latency time.Duration) {
 	latencyRing.Enqueue(latency)
 
-	lines := make([]string, 4)
+	lines := make([]string, 6)
 	for i := 0; i < latencyRing.Length; i += 1 {
 		latency := latencyRing.Get(i)
 		if latency == -1 {
 			lines[0] += " "
 			lines[1] += " "
 			lines[2] += " "
-			lines[3] += danger.Sprint("V")
+			lines[3] += " "
+			lines[4] += " "
+			lines[5] += danger.Sprint("V")
+		} else if latency < 10*time.Millisecond {
+			lines[0] += " "
+			lines[1] += " "
+			lines[2] += " "
+			lines[3] += " "
+			lines[4] += success.Sprint("▮")
+			lines[5] += " "
 		} else if latency < 30*time.Millisecond {
 			lines[0] += " "
 			lines[1] += " "
-			lines[2] += success.Sprint("-")
-			lines[3] += " "
+			lines[2] += " "
+			lines[3] += success.Sprint("▮")
+			lines[4] += success.Sprint("▮")
+			lines[5] += " "
+		} else if latency < 70*time.Millisecond {
+			lines[0] += " "
+			lines[1] += " "
+			lines[2] += warning.Sprint("▮")
+			lines[3] += warning.Sprint("▮")
+			lines[4] += warning.Sprint("▮")
+			lines[5] += " "
 		} else if latency < 100*time.Millisecond {
 			lines[0] += " "
-			lines[1] += warning.Sprint("^")
-			lines[2] += warning.Sprint("-")
-			lines[3] += " "
+			lines[1] += danger.Sprint("▮")
+			lines[2] += danger.Sprint("▮")
+			lines[3] += danger.Sprint("▮")
+			lines[4] += danger.Sprint("▮")
+			lines[5] += " "
 		} else {
-			lines[0] += danger.Sprint("^")
-			lines[1] += warning.Sprint("|")
-			lines[2] += warning.Sprint("-")
-			lines[3] += " "
+			lines[0] += danger.Sprint("▮")
+			lines[1] += danger.Sprint("▮")
+			lines[2] += danger.Sprint("▮")
+			lines[3] += danger.Sprint("▮")
+			lines[4] += danger.Sprint("▮")
+			lines[5] += " "
 		}
 
 	}
