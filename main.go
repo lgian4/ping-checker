@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	duration_circular_buffer "internet-checker/circular_buffer"
 	"net"
+	duration_circular_buffer "ping-checker/duration-circular_buffer"
 	"time"
 
 	"github.com/fatih/color"

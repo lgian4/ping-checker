@@ -1,4 +1,4 @@
-module internet-checker
+module ping-checker
 
 go 1.22.4
 
