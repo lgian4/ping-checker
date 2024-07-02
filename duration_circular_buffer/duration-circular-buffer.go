@@ -2,7 +2,7 @@ package duration_circular_buffer
 
 import "time"
 
-type Duration_CircularBuffer struct {
+type DurationCircularBuffer struct {
 	data            []time.Duration
 	head, tail      int
 	isFull, isEmpty bool
@@ -10,8 +10,8 @@ type Duration_CircularBuffer struct {
 	Length          int
 }
 
-func New(size int) *Duration_CircularBuffer {
-	return &Duration_CircularBuffer{
+func New(size int) *DurationCircularBuffer {
+	return &DurationCircularBuffer{
 		data:    make([]time.Duration, size),
 		isFull:  false,
 		isEmpty: true,
@@ -19,7 +19,7 @@ func New(size int) *Duration_CircularBuffer {
 	}
 }
 
-func (cb *Duration_CircularBuffer) Enqueue(value time.Duration) error {
+func (cb *DurationCircularBuffer) Enqueue(value time.Duration) error {
 	if cb.isFull {
 		cb.head = (cb.head + 1) % len(cb.data)
 	} else {
@@ -37,7 +37,7 @@ func (cb *Duration_CircularBuffer) Enqueue(value time.Duration) error {
 	return nil
 }
 
-func (cb *Duration_CircularBuffer) Get(index int) time.Duration {
+func (cb *DurationCircularBuffer) Get(index int) time.Duration {
 	if cb.isFull {
 		index = (cb.head + index) % len(cb.data)
 		return cb.data[index]

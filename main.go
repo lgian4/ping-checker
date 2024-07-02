@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 	"net"
-	duration_circular_buffer "ping-checker/duration-circular_buffer"
+	duration_circular_buffer "ping-checker/duration_circular_buffer"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/gosuri/uilive"
+	"github.com/guptarohit/asciigraph"
 )
 
 var latencyRing = duration_circular_buffer.New(100)
@@ -17,6 +18,7 @@ var success = color.New(color.FgWhite)
 var url = "1.1.1.1:80"
 
 func main() {
+
 	writer := uilive.New()
 	writer.Start()
 
@@ -38,7 +40,7 @@ func checkInternet() (bool, time.Duration) {
 	if err != nil {
 		danger.Print("Not connected ")
 		danger.Print("\n")
-		return false, -1
+		return false, -1 * time.Millisecond
 	}
 	defer con.Close()
 	return true, latency
@@ -55,7 +57,9 @@ func printColorText(connected bool, latency time.Duration) {
 		danger.Printf("Not connected to %v", url)
 	}
 	warning.Print(" : ")
-	if latency < 30*time.Millisecond {
+	if latency < 1*time.Millisecond {
+		danger.Print(latency)
+	} else if latency < 30*time.Millisecond {
 		success.Print(latency)
 	} else if latency < 100*time.Millisecond {
 		warning.Print(latency)
@@ -68,57 +72,21 @@ func printColorText(connected bool, latency time.Duration) {
 
 func printLatencyGraph(latency time.Duration) {
 	latencyRing.Enqueue(latency)
+	latencyArray := make([]float64, latencyRing.Length)
+	line := danger.Sprint("  -1  ")
 
-	lines := make([]string, 6)
 	for i := 0; i < latencyRing.Length; i += 1 {
-		latency := latencyRing.Get(i)
-		if latency == -1 {
-			lines[0] += " "
-			lines[1] += " "
-			lines[2] += " "
-			lines[3] += " "
-			lines[4] += " "
-			lines[5] += danger.Sprint("V")
-		} else if latency < 10*time.Millisecond {
-			lines[0] += " "
-			lines[1] += " "
-			lines[2] += " "
-			lines[3] += " "
-			lines[4] += success.Sprint("▮")
-			lines[5] += " "
-		} else if latency < 30*time.Millisecond {
-			lines[0] += " "
-			lines[1] += " "
-			lines[2] += " "
-			lines[3] += success.Sprint("▮")
-			lines[4] += success.Sprint("▮")
-			lines[5] += " "
-		} else if latency < 70*time.Millisecond {
-			lines[0] += " "
-			lines[1] += " "
-			lines[2] += warning.Sprint("▮")
-			lines[3] += warning.Sprint("▮")
-			lines[4] += warning.Sprint("▮")
-			lines[5] += " "
-		} else if latency < 100*time.Millisecond {
-			lines[0] += " "
-			lines[1] += danger.Sprint("▮")
-			lines[2] += danger.Sprint("▮")
-			lines[3] += danger.Sprint("▮")
-			lines[4] += danger.Sprint("▮")
-			lines[5] += " "
+		number := float64(latencyRing.Get(i).Milliseconds())
+		latencyArray[i] = number
+		if number < 0 {
+			line += danger.Sprint("V")
 		} else {
-			lines[0] += danger.Sprint("▮")
-			lines[1] += danger.Sprint("▮")
-			lines[2] += danger.Sprint("▮")
-			lines[3] += danger.Sprint("▮")
-			lines[4] += danger.Sprint("▮")
-			lines[5] += " "
+			line += " "
 		}
-
 	}
+	graph := asciigraph.Plot(latencyArray, asciigraph.Height(20), asciigraph.Precision(0))
 
-	for _, line := range lines {
-		fmt.Println(line)
-	}
+	fmt.Println(graph)
+	fmt.Println(line)
+
 }
